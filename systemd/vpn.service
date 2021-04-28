@@ -1,0 +1,9 @@
+[Unit]
+Description=VPN
+After=network.target
+[Service]
+EnvironmentFile=/home/vagrant/vpn.env
+ExecStart=/bin/bash -c "echo $VPN_PASSWORD | /usr/sbin/openconnect --passwd-on-stdin --user=$VPN_USER $VPN_URL"
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

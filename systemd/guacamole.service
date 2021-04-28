@@ -1,0 +1,9 @@
+[Unit]
+Description=Guacamole server
+After=network.target
+[Service]
+WorkingDirectory=/home/vagrant/docker
+ExecStart=/usr/local/bin/docker-compose up
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

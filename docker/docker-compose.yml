@@ -1,0 +1,44 @@
+version: "3.8"
+
+volumes:
+    dbinit:
+    dbdata:
+
+services:
+    init-guacamole-db:
+    # https://github.com/reisbel/guacamole-docker-compose
+        image: guacamole/guacamole
+        container_name: guac-init
+        command: [
+            "/bin/sh",
+            "-c",
+            "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgres > /init/initdb.sql" ]
+        volumes:
+            - dbinit:/init
+
+    postgres:
+        image: postgres
+        container_name: guac-db
+        volumes:
+            - dbinit:/docker-entrypoint-initdb.d
+            - dbdata:/var/lib/postgresql/data
+        env_file: guacamole-client/db.env
+        depends_on:
+            - init-guacamole-db
+
+    guacd:
+        build: guacamole-server/
+        container_name: guacd
+
+    guac:
+        image: guacamole/guacamole
+        container_name: guac
+        env_file:
+            - guacamole-client/db.env
+        ports:
+            - 8080:8080
+        environment:
+            GUACD_HOSTNAME: guacd
+        depends_on:
+            - postgres
+            - guacd
